@@ -76,10 +76,15 @@ class QLearningAgent:
         state = self.get_state(board)
         q_values = self.get_q_values(state)
 
-        # TODO A1: Mit Wahrscheinlichkeit epsilon zufällig aus valid_actions wählen.
-        # TODO A2: Sonst den höchsten Q-Wert NUR unter valid_actions bestimmen.
-        # TODO A3: Bei Gleichstand zufällig zwischen den besten legalen Zügen wählen.
-        raise NotImplementedError("TODO A: choose_action vervollständigen")
+        if self.rng.random() < self.epsilon:
+            # exploration
+            return random.choice(valid_actions)
+
+        else:
+            # exploitation
+            max_q = max([q_values[i] for i in valid_actions])
+            best_moves = [i for i in valid_actions if q_values[i] == max_q]
+            return random.choice(best_moves)
 
     def update_q_table(self, state, action, reward, next_state=None, terminal=False):
         """TODO B: Genau Q(state, action) gemäss Q-Learning aktualisieren."""
@@ -87,8 +92,7 @@ class QLearningAgent:
         old_value = q_values[action]
 
         if terminal:
-            # TODO B1: Für terminale Zustände ist target nur der unmittelbare Reward.
-            target = None
+            target = reward
         else:
             if next_state is None:
                 raise ValueError("Für ein nicht-terminales Update ist next_state nötig.")
@@ -97,14 +101,69 @@ class QLearningAgent:
                 raise ValueError("Ein terminaler Folgezustand braucht terminal=True.")
 
             next_q_values = self.get_q_values(next_state)
-            # TODO B2: best_next_value = höchster Wert nur über next_actions.
-            # TODO B3: target = reward + gamma * best_next_value.
-            target = None
+            target = reward + self.gamma * max(next_q_values)
 
-        # TODO B4: Q <- old_value + alpha * (target - old_value)
-        #           und Ergebnis an q_values[action] speichern.
-        raise NotImplementedError("TODO B: update_q_table vervollständigen")
+        self.q_table[state][action] = old_value + self.alpha * (target - old_value)
+        # raise NotImplementedError("TODO B: update_q_table vervollständigen")
 
-    def train_agent(self, episodes=20_000, seed=None):
-        """TODO C: Methode aus den drei Codebausteinen im Arbeitsheft übertragen."""
-        raise NotImplementedError("TODO C: train_agent aus dem Arbeitsheft übertragen")
+    def train_agent(self, episodes=20_000_000, seed=None):
+        # Trainiere gegen zufälliges X und gib ein Ergebnis pro Episode zurück.
+        if seed is not None:
+            self.rng.seed(seed)
+        history = []
+        for _ in range(episodes):
+            self.game.board = [[" " for _ in range(3)] for _ in range(3)]
+            board = self.game.board
+            result = None
+            # X beginnt jede Partie mit einem zufälligen legalen Zug.
+            x_action = self.rng.choice(self.get_valid_actions(board))
+            row, col = divmod(x_action, 3)
+            board[row][col] = "X"
+            while result is None:
+                # Zustand und Aktion des Agenten vor dem Zug sichern.
+                state = self.get_state(board)
+                action = self.choose_action(board)
+                row, col = divmod(action, 3)
+                board[row][col] = "O"
+
+                if self.game.check_winner("O"):
+                    self.update_q_table(
+                    state, action, self.reward_win, terminal=True
+                    )
+                    result = "win"
+                elif self.game.is_board_full():
+                    self.update_q_table(
+                    state, action, self.reward_draw, terminal=True
+                    )
+                    result = "draw"
+                else:
+                    # Die Umgebung führt genau eine Zufallsantwort aus.
+                    x_action = self.rng.choice(self.get_valid_actions(board))
+                    row, col = divmod(x_action, 3)
+                    board[row][col] = "X"
+                    if self.game.check_winner("X"):
+                        self.update_q_table(
+                        state, action, self.reward_loss, terminal=True
+                        )
+                        result = "loss"
+                    elif self.game.is_board_full():
+                        self.update_q_table(
+                        state, action, self.reward_draw, terminal=True
+                        )
+                        result = "draw"
+                    else:
+                        # s' ist das Brett nach Xs realer Antwort.
+                        next_state = self.get_state(board)
+                        self.update_q_table(
+                        state,
+                        action,
+                        reward=0,
+                        next_state=next_state,
+                        terminal=False,
+                        )
+            history.append(result)
+            self.epsilon = max(
+                self.epsilon_min,
+                self.epsilon * self.epsilon_decay,
+            )
+        return history

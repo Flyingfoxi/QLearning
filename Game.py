@@ -1,4 +1,4 @@
-import random
+import random, os
 
 class Game:
     def __init__(self):
@@ -30,7 +30,7 @@ class Game:
         if self.agent:
             action = self.agent.choose_action()
             row, col = divmod(action, 3)
-            self.board[row][col] = "O"         
+            self.board[row][col] = "O"
         else:
             while True:
                 row, col = random.randint(0, 2), random.randint(0, 2)
@@ -48,8 +48,8 @@ class Game:
 
         while True:
             try:
-                move = input("Dein Zug (gib Zeile und Spalte als [Zeile, Spalte] an): ")
-                row, col = eval(move)
+                move = input("Dein Zug (gib Zeile und Spalte als \"Zeile, Spalte\" an): ")
+                row, col = [int(i.strip()) for i in move.split(",")]
                 if not self.is_valid_move(row, col):
                     print("Ungültiger Zug, versuch es nochmal.")
                     continue

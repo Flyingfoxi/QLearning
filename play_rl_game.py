@@ -6,11 +6,11 @@ from QLearningAgent import QLearningAgent
 def main():
     game = Game()
     agent = QLearningAgent(game)
-    episodes = 20_000
+    episodes = 10_000
 
     print(f"Trainiere gegen zufälliges X ({episodes:,} Episoden)...".replace(",", "."))
     history = agent.train_agent(episodes=episodes, seed=7)
-    window_size = 500
+    window_size = 1000
     print("\nFenster | Siegquote | Niederlagenquote | Remisquote")
     for start in range(0, len(history), window_size):
         window = history[start:start + window_size]
