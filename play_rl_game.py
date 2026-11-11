@@ -1,4 +1,5 @@
 """Trainiere den implementierten Agenten und spiele danach gegen ihn."""
+
 from Game import Game
 from QLearningAgent import QLearningAgent
 
@@ -13,12 +14,14 @@ def main():
     window_size = 1000
     print("\nFenster | Siegquote | Niederlagenquote | Remisquote")
     for start in range(0, len(history), window_size):
-        window = history[start:start + window_size]
+        window = history[start : start + window_size]
         n = len(window)
         wins = window.count("win") / n
         losses = window.count("loss") / n
         draws = window.count("draw") / n
-        print(f"{start + 1:>5}–{start + n:<5} | {wins:>8.1%} | {losses:>15.1%} | {draws:>11.1%}")
+        print(
+            f"{start + 1:>5}–{start + n:<5} | {wins:>8.1%} | {losses:>15.1%} | {draws:>11.1%}"
+        )
 
     print("\nTraining abgeschlossen. Du spielst X; der Agent spielt O.")
     agent.epsilon = 0.0  # Während der Partie soll der Agent nicht mehr explorieren.

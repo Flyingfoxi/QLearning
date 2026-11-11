@@ -7,13 +7,20 @@ Programmieraufträge; train_agent wird aus drei Codeblöcken des Arbeitshefts
 übertragen.
 """
 
-from copy import deepcopy
 import random
+from copy import deepcopy
 
 
 class QLearningAgent:
-    def __init__(self, game, alpha=0.2, gamma=0.9, epsilon=0.3,
-                 epsilon_decay=0.9995, epsilon_min=0.02):
+    def __init__(
+        self,
+        game,
+        alpha=0.2,
+        gamma=0.9,
+        epsilon=0.3,
+        epsilon_decay=0.9995,
+        epsilon_min=0.02,
+    ):
         """Startwerte für Umgebung, Hyperparameter und Q-Tabelle."""
         self.game = game
         self.alpha = alpha
@@ -80,11 +87,10 @@ class QLearningAgent:
             # exploration
             return random.choice(valid_actions)
 
-        else:
-            # exploitation
-            max_q = max([q_values[i] for i in valid_actions])
-            best_moves = [i for i in valid_actions if q_values[i] == max_q]
-            return random.choice(best_moves)
+        # exploitation
+        max_q = max(q_values[i] for i in valid_actions)
+        best_moves = [i for i in valid_actions if q_values[i] == max_q]
+        return random.choice(best_moves)
 
     def update_q_table(self, state, action, reward, next_state=None, terminal=False):
         """TODO B: Genau Q(state, action) gemäss Q-Learning aktualisieren."""
@@ -95,7 +101,9 @@ class QLearningAgent:
             target = reward
         else:
             if next_state is None:
-                raise ValueError("Für ein nicht-terminales Update ist next_state nötig.")
+                raise ValueError(
+                    "Für ein nicht-terminales Update ist next_state nötig."
+                )
             next_actions = self.get_valid_actions(next_state)
             if not next_actions:
                 raise ValueError("Ein terminaler Folgezustand braucht terminal=True.")
@@ -127,14 +135,10 @@ class QLearningAgent:
                 board[row][col] = "O"
 
                 if self.game.check_winner("O"):
-                    self.update_q_table(
-                    state, action, self.reward_win, terminal=True
-                    )
+                    self.update_q_table(state, action, self.reward_win, terminal=True)
                     result = "win"
                 elif self.game.is_board_full():
-                    self.update_q_table(
-                    state, action, self.reward_draw, terminal=True
-                    )
+                    self.update_q_table(state, action, self.reward_draw, terminal=True)
                     result = "draw"
                 else:
                     # Die Umgebung führt genau eine Zufallsantwort aus.
@@ -143,23 +147,23 @@ class QLearningAgent:
                     board[row][col] = "X"
                     if self.game.check_winner("X"):
                         self.update_q_table(
-                        state, action, self.reward_loss, terminal=True
+                            state, action, self.reward_loss, terminal=True
                         )
                         result = "loss"
                     elif self.game.is_board_full():
                         self.update_q_table(
-                        state, action, self.reward_draw, terminal=True
+                            state, action, self.reward_draw, terminal=True
                         )
                         result = "draw"
                     else:
                         # s' ist das Brett nach Xs realer Antwort.
                         next_state = self.get_state(board)
                         self.update_q_table(
-                        state,
-                        action,
-                        reward=0,
-                        next_state=next_state,
-                        terminal=False,
+                            state,
+                            action,
+                            reward=0,
+                            next_state=next_state,
+                            terminal=False,
                         )
             history.append(result)
             self.epsilon = max(
