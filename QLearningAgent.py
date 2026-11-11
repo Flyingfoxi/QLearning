@@ -13,7 +13,7 @@ import random
 
 class QLearningAgent:
     def __init__(self, game, alpha=0.2, gamma=0.9, epsilon=0.3,
-                 epsilon_decay=0.9995, epsilon_min=0.02):
+                 epsilon_decay=0.999, epsilon_min=0.01):
         """Startwerte für Umgebung, Hyperparameter und Q-Tabelle."""
         self.game = game
         self.alpha = alpha
@@ -23,8 +23,8 @@ class QLearningAgent:
         self.epsilon_min = epsilon_min
 
         self.reward_win = 1
-        self.reward_loss = -1
-        self.reward_draw = 0
+        self.reward_loss = -10
+        self.reward_draw = -0.1
 
         # Schlüssel: Tupelzustand. Wert: neun Aktionswerte für die Felder 0–8.
         self.q_table = {}

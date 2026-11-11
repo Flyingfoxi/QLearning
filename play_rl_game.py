@@ -20,6 +20,11 @@ def main():
         draws = window.count("draw") / n
         print(f"{start + 1:>5}–{start + n:<5} | {wins:>8.1%} | {losses:>15.1%} | {draws:>11.1%}")
 
+
+    print(f"alpha: {agent.alpha}, gamma: {agent.gamma}, epsilon: {agent.epsilon}")
+
+    return
+
     print("\nTraining abgeschlossen. Du spielst X; der Agent spielt O.")
     agent.epsilon = 0.0  # Während der Partie soll der Agent nicht mehr explorieren.
     game.set_agent(agent)
